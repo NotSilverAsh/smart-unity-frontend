@@ -362,8 +362,10 @@ export default function Home() {
 
   useEffect(() => {
     if (!weatherData?.forecast || !window.Chart || !scriptsLoaded) return;
-    
-    const canvas = document.getElementById("forecastChart") as HTMLCanvasElement | null;
+
+    const canvas = document.getElementById(
+      "forecastChart"
+    ) as HTMLCanvasElement | null;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -404,7 +406,7 @@ export default function Home() {
             yAxisID: "y",
             tension: 0.4,
             pointRadius: isMobile ? 4 : 3,
-            pointHoverRadius: isMobile ? 6 : 5
+            pointHoverRadius: isMobile ? 6 : 5,
           },
           {
             label: `Min Temp (°${tempUnit})`,
@@ -415,7 +417,7 @@ export default function Home() {
             yAxisID: "y",
             tension: 0.4,
             pointRadius: isMobile ? 4 : 3,
-            pointHoverRadius: isMobile ? 6 : 5
+            pointHoverRadius: isMobile ? 6 : 5,
           },
           {
             label: "Precipitation (mm)",
@@ -427,7 +429,7 @@ export default function Home() {
             tension: 0.4,
             type: "bar",
             barPercentage: isMobile ? 0.6 : 0.8,
-            categoryPercentage: 0.8
+            categoryPercentage: 0.8,
           },
         ],
       },
@@ -440,41 +442,41 @@ export default function Home() {
         },
         plugins: {
           legend: {
-            labels: { 
+            labels: {
               color: theme === "light" ? "#000" : "#fff",
               font: {
-                size: isMobile ? 12 : 14
-              }
+                size: isMobile ? 12 : 14,
+              },
             },
-            position: isMobile ? 'bottom' : 'top'
+            position: isMobile ? "bottom" : "top",
           },
           title: {
             display: true,
             text: "7-Day Forecast",
             color: theme === "light" ? "#000" : "#fff",
             font: {
-              size: isMobile ? 14 : 16
-            }
+              size: isMobile ? 14 : 16,
+            },
           },
           tooltip: {
             titleFont: {
-              size: isMobile ? 12 : 14
+              size: isMobile ? 12 : 14,
             },
             bodyFont: {
-              size: isMobile ? 12 : 14
-            }
-          }
+              size: isMobile ? 12 : 14,
+            },
+          },
         },
         scales: {
           x: {
-            ticks: { 
+            ticks: {
               color: theme === "light" ? "#000" : "#fff",
               font: {
-                size: isMobile ? 10 : 12
+                size: isMobile ? 10 : 12,
               },
               maxRotation: isMobile ? 45 : 0,
               autoSkip: true,
-              maxTicksLimit: isMobile ? 7 : 12
+              maxTicksLimit: isMobile ? 7 : 12,
             },
             grid: { color: "#444" },
           },
@@ -482,11 +484,11 @@ export default function Home() {
             type: "linear",
             display: true,
             position: "left",
-            ticks: { 
+            ticks: {
               color: theme === "light" ? "#000" : "#fff",
               font: {
-                size: isMobile ? 10 : 12
-              }
+                size: isMobile ? 10 : 12,
+              },
             },
             grid: { color: "#444" },
             title: {
@@ -494,19 +496,19 @@ export default function Home() {
               text: `Temperature (°${tempUnit})`,
               color: theme === "light" ? "#000" : "#fff",
               font: {
-                size: isMobile ? 11 : 13
-              }
+                size: isMobile ? 11 : 13,
+              },
             },
           },
           y1: {
             type: "linear",
             display: true,
             position: "right",
-            ticks: { 
+            ticks: {
               color: theme === "light" ? "#000" : "#fff",
               font: {
-                size: isMobile ? 10 : 12
-              }
+                size: isMobile ? 10 : 12,
+              },
             },
             grid: { drawOnChartArea: false, color: "#444" },
             title: {
@@ -514,14 +516,14 @@ export default function Home() {
               text: "Precipitation (mm)",
               color: theme === "light" ? "#000" : "#fff",
               font: {
-                size: isMobile ? 11 : 13
-              }
+                size: isMobile ? 11 : 13,
+              },
             },
           },
         },
         layout: {
-          padding: isMobile ? 10 : 20
-        }
+          padding: isMobile ? 10 : 20,
+        },
       },
     });
   }, [weatherData, tempUnit, scriptsLoaded, theme]);
@@ -689,13 +691,18 @@ export default function Home() {
     <>
       <Head>
         <title>NASA Weather Forecast</title>
-        <meta name="description" content="Weather forecast powered by NASA data" />
+        <meta
+          name="description"
+          content="Weather forecast powered by NASA data"
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <div className={`${themeClass} min-h-screen p-4 transition-colors duration-300`}>
+      <div
+        className={`${themeClass} min-h-screen p-4 transition-colors duration-300`}
+      >
         <div className="fixed top-4 right-4 z-[1000] flex gap-2">
-          <button 
+          <button
             className="p-2 bg-gray-700 rounded-md text-white hover:bg-gray-600 transition-colors"
             onClick={() => setMenuOpen(true)}
             aria-label="Open menu"
@@ -703,7 +710,7 @@ export default function Home() {
             ☰
           </button>
           {menuOpen && (
-            <button 
+            <button
               className="p-2 bg-red-600 rounded-md text-white hover:bg-red-700 transition-colors"
               onClick={() => setMenuOpen(false)}
               aria-label="Close menu"
@@ -721,9 +728,9 @@ export default function Home() {
           <h3 className="text-lg mb-4 font-semibold text-white">Settings</h3>
           <div className="mb-4">
             <label className="text-white mr-2">Temp Unit:</label>
-            <select 
+            <select
               className="bg-gray-700 p-1 rounded w-full text-white border border-gray-600"
-              value={tempUnit} 
+              value={tempUnit}
               onChange={(e) => setTempUnit(e.target.value as "C" | "F")}
             >
               <option value="C">°C</option>
@@ -732,10 +739,12 @@ export default function Home() {
           </div>
           <div className="mb-4">
             <label className="text-white mr-2">Wind Unit:</label>
-            <select 
+            <select
               className="bg-gray-700 p-1 rounded w-full text-white border border-gray-600"
-              value={windUnit} 
-              onChange={(e) => setWindUnit(e.target.value as "m/s" | "km/h" | "mph")}
+              value={windUnit}
+              onChange={(e) =>
+                setWindUnit(e.target.value as "m/s" | "km/h" | "mph")
+              }
             >
               <option value="m/s">m/s</option>
               <option value="km/h">km/h</option>
@@ -816,8 +825,9 @@ export default function Home() {
               <p>Latitude: {location.lat.toFixed(4)}</p>
               <p>Longitude: {location.lon.toFixed(4)}</p>
               <br />
-              <p className="mt-4 rounded bg-yellow-900 text-yellow-300 p-2 font-semibold text-center text-xs sm:text-sm">
-                NASA Space Apps Challenge: Uses POWER satellite data with probability analysis. Data combines observations with climate models.
+              <p className="mt-4 rounded bg-yellow-900 text-yellow-300 p-2 font-semibold text-center">
+                Please note: Weather data combines NASA satellite observations
+                with climate models and may not reflect real-time conditions.
               </p>
             </div>
 
@@ -857,14 +867,14 @@ export default function Home() {
             id="map"
             className="shadow-lg bg-gray-700 rounded-lg h-64 sm:h-80 lg:h-96 flex items-center justify-center relative z-0"
           >
-            {!scriptsLoaded && (
-              <div className="text-white">Loading map...</div>
-            )}
+            {!scriptsLoaded && <div className="text-white">Loading map...</div>}
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-700 p-3 rounded text-white mb-4 text-sm sm:text-base">{error}</div>
+          <div className="bg-red-700 p-3 rounded text-white mb-4 text-sm sm:text-base">
+            {error}
+          </div>
         )}
 
         {weatherData?.probabilities &&
@@ -938,11 +948,15 @@ export default function Home() {
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
               <div className="bg-gray-700 p-3 sm:p-4 rounded-lg text-center">
-                <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">Temperature</h3>
+                <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">
+                  Temperature
+                </h3>
                 <p className="text-xl sm:text-3xl font-bold text-blue-300">
                   {weatherData.current.temperature !== null &&
                   weatherData.current.temperature !== undefined
-                    ? `${weatherData.current.temperature.toFixed(1)}°${tempUnit}`
+                    ? `${weatherData.current.temperature.toFixed(
+                        1
+                      )}°${tempUnit}`
                     : "N/A"}
                 </p>
                 <p className="text-xs sm:text-sm text-gray-300">
@@ -954,14 +968,18 @@ export default function Home() {
                 </p>
               </div>
               <div className="bg-gray-700 p-3 sm:p-4 rounded-lg text-center">
-                <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">Conditions</h3>
+                <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">
+                  Conditions
+                </h3>
                 <p className="text-lg sm:text-2xl font-bold text-green-300">
                   {getWeatherIcon(weatherData.current.conditions)}{" "}
                   {weatherData.current.conditions || "N/A"}
                 </p>
               </div>
               <div className="bg-gray-700 p-3 sm:p-4 rounded-lg text-center">
-                <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">Wind</h3>
+                <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">
+                  Wind
+                </h3>
                 <p className="text-xl sm:text-3xl font-bold text-yellow-300">
                   {weatherData.current.wind_speed !== null &&
                   weatherData.current.wind_speed !== undefined
@@ -970,7 +988,9 @@ export default function Home() {
                 </p>
               </div>
               <div className="bg-gray-700 p-3 sm:p-4 rounded-lg text-center">
-                <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">Humidity</h3>
+                <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">
+                  Humidity
+                </h3>
                 <p className="text-xl sm:text-3xl font-bold text-purple-300">
                   {weatherData.current.humidity !== null &&
                   weatherData.current.humidity !== undefined
@@ -1007,7 +1027,9 @@ export default function Home() {
                       : "bg-red-900 text-red-200 hover:bg-red-800"
                   }`}
                 >
-                  <div className="font-semibold text-sm sm:text-base">{s.activity}</div>
+                  <div className="font-semibold text-sm sm:text-base">
+                    {s.activity}
+                  </div>
                   <div className="text-xs sm:text-sm">
                     {s.suitable
                       ? "✅ Suitable"
@@ -1023,7 +1045,9 @@ export default function Home() {
 
         {weatherData?.forecast && (
           <div className="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg text-white mb-6">
-            <h2 className="text-xl sm:text-2xl mb-4 text-blue-200">7-Day Forecast</h2>
+            <h2 className="text-xl sm:text-2xl mb-4 text-blue-200">
+              7-Day Forecast
+            </h2>
 
             <div className="mb-6 bg-gray-700 p-4 rounded-lg">
               <div className="h-64 sm:h-80 md:h-96">
