@@ -362,13 +362,16 @@ export default function Home() {
 
   useEffect(() => {
     if (!weatherData?.forecast || !window.Chart || !scriptsLoaded) return;
-
-    const canvas = document.getElementById(
-      "forecastChart"
-    ) as HTMLCanvasElement | null;
+    
+    const canvas = document.getElementById("forecastChart") as HTMLCanvasElement | null;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+
+    // Destroy existing chart if it exists
+    if (chartRef.current) {
+      chartRef.current.destroy();
+    }
 
     const labels = weatherData.forecast.map((d) => {
       const date = new Date(d.date);
@@ -383,14 +386,9 @@ export default function Home() {
     const minTemps = weatherData.forecast.map((d) => d.min_temp || 0);
     const precip = weatherData.forecast.map((d) => d.precipitation || 0);
 
-    if (chartRef.current) {
-      chartRef.current.data.labels = labels;
-      chartRef.current.data.datasets[0].data = maxTemps;
-      chartRef.current.data.datasets[1].data = minTemps;
-      chartRef.current.data.datasets[2].data = precip;
-      chartRef.current.update();
-      return;
-    }
+    // Mobile detection and responsive settings
+    const isMobile = window.innerWidth < 768;
+    const isTablet = window.innerWidth < 1024;
 
     chartRef.current = new window.Chart(ctx, {
       type: "line",
@@ -402,74 +400,128 @@ export default function Home() {
             data: maxTemps,
             borderColor: "rgb(255, 99, 132)",
             backgroundColor: "rgba(255, 99, 132, 0.2)",
+            borderWidth: isMobile ? 3 : 2,
             yAxisID: "y",
             tension: 0.4,
+            pointRadius: isMobile ? 4 : 3,
+            pointHoverRadius: isMobile ? 6 : 5
           },
           {
             label: `Min Temp (°${tempUnit})`,
             data: minTemps,
             borderColor: "rgb(54, 162, 235)",
             backgroundColor: "rgba(54, 162, 235, 0.2)",
+            borderWidth: isMobile ? 3 : 2,
             yAxisID: "y",
             tension: 0.4,
+            pointRadius: isMobile ? 4 : 3,
+            pointHoverRadius: isMobile ? 6 : 5
           },
           {
             label: "Precipitation (mm)",
             data: precip,
             borderColor: "rgb(75, 192, 192)",
             backgroundColor: "rgba(75, 192, 192, 0.2)",
+            borderWidth: isMobile ? 3 : 2,
             yAxisID: "y1",
             tension: 0.4,
             type: "bar",
+            barPercentage: isMobile ? 0.6 : 0.8,
+            categoryPercentage: 0.8
           },
         ],
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false, // This is key for mobile!
         interaction: {
           mode: "index",
           intersect: false,
         },
         plugins: {
           legend: {
-            labels: { color: theme === "light" ? "#000" : "#fff" },
+            labels: { 
+              color: theme === "light" ? "#000" : "#fff",
+              font: {
+                size: isMobile ? 12 : 14
+              }
+            },
+            position: isMobile ? 'bottom' : 'top'
           },
           title: {
             display: true,
             text: "7-Day Forecast",
             color: theme === "light" ? "#000" : "#fff",
+            font: {
+              size: isMobile ? 14 : 16
+            }
           },
+          tooltip: {
+            titleFont: {
+              size: isMobile ? 12 : 14
+            },
+            bodyFont: {
+              size: isMobile ? 12 : 14
+            }
+          }
         },
         scales: {
           x: {
-            ticks: { color: theme === "light" ? "#000" : "#fff" },
+            ticks: { 
+              color: theme === "light" ? "#000" : "#fff",
+              font: {
+                size: isMobile ? 10 : 12
+              },
+              maxRotation: isMobile ? 45 : 0,
+              autoSkip: true,
+              maxTicksLimit: isMobile ? 7 : 12
+            },
             grid: { color: "#444" },
           },
           y: {
             type: "linear",
             display: true,
             position: "left",
-            ticks: { color: theme === "light" ? "#000" : "#fff" },
+            ticks: { 
+              color: theme === "light" ? "#000" : "#fff",
+              font: {
+                size: isMobile ? 10 : 12
+              }
+            },
             grid: { color: "#444" },
             title: {
               display: true,
               text: `Temperature (°${tempUnit})`,
               color: theme === "light" ? "#000" : "#fff",
+              font: {
+                size: isMobile ? 11 : 13
+              }
             },
           },
           y1: {
             type: "linear",
             display: true,
             position: "right",
-            ticks: { color: theme === "light" ? "#000" : "#fff" },
+            ticks: { 
+              color: theme === "light" ? "#000" : "#fff",
+              font: {
+                size: isMobile ? 10 : 12
+              }
+            },
             grid: { drawOnChartArea: false, color: "#444" },
             title: {
               display: true,
               text: "Precipitation (mm)",
               color: theme === "light" ? "#000" : "#fff",
+              font: {
+                size: isMobile ? 11 : 13
+              }
             },
           },
         },
+        layout: {
+          padding: isMobile ? 10 : 20
+        }
       },
     });
   }, [weatherData, tempUnit, scriptsLoaded, theme]);
@@ -635,17 +687,69 @@ export default function Home() {
 
   return (
     <>
-      <div
-        className={`${themeClass} min-h-screen p-4 transition-colors duration-300`}
-      >
+      <Head>
+        <title>NASA Weather Forecast</title>
+        <meta name="description" content="Weather forecast powered by NASA data" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
 
+      <div className={`${themeClass} min-h-screen p-4 transition-colors duration-300`}>
+        <div className="fixed top-4 right-4 z-[1000] flex gap-2">
+          <button 
+            className="p-2 bg-gray-700 rounded-md text-white hover:bg-gray-600 transition-colors"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open menu"
+          >
+            ☰
+          </button>
+          {menuOpen && (
+            <button 
+              className="p-2 bg-red-600 rounded-md text-white hover:bg-red-700 transition-colors"
+              onClick={() => setMenuOpen(false)}
+              aria-label="Close menu"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        <div
+          className={`fixed top-0 right-0 h-full bg-gray-800 shadow-lg z-[1000] w-64 p-4 transform transition-transform duration-300 ${
+            menuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <h3 className="text-lg mb-4 font-semibold text-white">Settings</h3>
+          <div className="mb-4">
+            <label className="text-white mr-2">Temp Unit:</label>
+            <select 
+              className="bg-gray-700 p-1 rounded w-full text-white border border-gray-600"
+              value={tempUnit} 
+              onChange={(e) => setTempUnit(e.target.value as "C" | "F")}
+            >
+              <option value="C">°C</option>
+              <option value="F">°F</option>
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="text-white mr-2">Wind Unit:</label>
+            <select 
+              className="bg-gray-700 p-1 rounded w-full text-white border border-gray-600"
+              value={windUnit} 
+              onChange={(e) => setWindUnit(e.target.value as "m/s" | "km/h" | "mph")}
+            >
+              <option value="m/s">m/s</option>
+              <option value="km/h">km/h</option>
+              <option value="mph">mph</option>
+            </select>
+          </div>
+        </div>
 
         {showThresholdModal && <ThresholdModal />}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <div className="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col justify-start text-white">
-            <h2 className="text-2xl font-semibold mb-4 text-blue-200">
-              Weather Dashboard
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 mb-8">
+          <div className="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg flex flex-col justify-start text-white">
+            <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-blue-200">
+              NASA Weather Dashboard
             </h2>
 
             <input
@@ -659,13 +763,13 @@ export default function Home() {
 
             <div className="flex gap-2 mb-3">
               <button
-                className="flex-1 bg-blue-600 hover:bg-blue-700 p-2 rounded transition-colors"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 p-2 rounded transition-colors text-sm sm:text-base"
                 onClick={handleSearch}
               >
                 Search
               </button>
               <button
-                className="bg-gray-600 hover:bg-gray-500 p-2 rounded text-white transition-colors"
+                className="bg-gray-600 hover:bg-gray-500 p-2 rounded text-white transition-colors text-sm sm:text-base"
                 onClick={() => {
                   if (!("geolocation" in navigator)) {
                     setError("Geolocation is not supported by your browser");
@@ -699,7 +803,7 @@ export default function Home() {
                     className="p-2 hover:bg-blue-600 cursor-pointer text-white border-b border-gray-600 last:border-b-0"
                     onClick={() => selectSuggestion(s)}
                   >
-                    {s.name}
+                    <div className="text-sm sm:text-base">{s.name}</div>
                     <div className="text-xs text-gray-300">
                       {s.lat.toFixed(4)}, {s.lon.toFixed(4)}
                     </div>
@@ -708,40 +812,40 @@ export default function Home() {
               </div>
             )}
 
-            <div className="mb-2 text-sm">
+            <div className="mb-2 text-xs sm:text-sm">
               <p>Latitude: {location.lat.toFixed(4)}</p>
               <p>Longitude: {location.lon.toFixed(4)}</p>
               <br />
-              <p className="mt-4 rounded bg-yellow-900 text-yellow-300 p-2 font-semibold text-center">
-                Data Source: NASA POWER & GMAO models. Probability calculations use historical climate data. Ideal for trend analysis and planning, but verify with local forecasts before continuing.
+              <p className="mt-4 rounded bg-yellow-900 text-yellow-300 p-2 font-semibold text-center text-xs sm:text-sm">
+                NASA Space Apps Challenge: Uses POWER satellite data with probability analysis. Data combines observations with climate models.
               </p>
             </div>
 
-            <div className="flex gap-2 mb-3">
+            <div className="flex gap-2 mb-3 flex-col sm:flex-row">
               <button
                 onClick={() => getWeatherForecast()}
                 disabled={loading}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 p-3 rounded disabled:bg-gray-600 transition-colors"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 p-3 rounded disabled:bg-gray-600 transition-colors text-sm sm:text-base"
               >
                 {loading ? "Fetching Data..." : "Get Weather"}
               </button>
               <button
-                className="bg-purple-600 hover:bg-purple-700 p-3 rounded text-white transition-colors"
+                className="bg-purple-600 hover:bg-purple-700 p-3 rounded text-white transition-colors text-sm sm:text-base"
                 onClick={() => setShowThresholdModal(true)}
               >
                 Set Thresholds
               </button>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-col sm:flex-row">
               <button
-                className="flex-1 bg-green-600 hover:bg-green-700 p-2 rounded text-white transition-colors"
+                className="flex-1 bg-green-600 hover:bg-green-700 p-2 rounded text-white transition-colors text-sm sm:text-base"
                 onClick={() => downloadData("csv")}
               >
                 Download CSV
               </button>
               <button
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 p-2 rounded text-white transition-colors"
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 p-2 rounded text-white transition-colors text-sm sm:text-base"
                 onClick={() => downloadData("json")}
               >
                 Download JSON
@@ -751,35 +855,35 @@ export default function Home() {
 
           <div
             id="map"
-            className="shadow-lg bg-gray-700 rounded-lg h-96 flex items-center justify-center relative z-0"
+            className="shadow-lg bg-gray-700 rounded-lg h-64 sm:h-80 lg:h-96 flex items-center justify-center relative z-0"
           >
             {!scriptsLoaded && (
-              <div className="text-white">Loading NASA map...</div>
+              <div className="text-white">Loading map...</div>
             )}
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-700 p-3 rounded text-white mb-4">{error}</div>
+          <div className="bg-red-700 p-3 rounded text-white mb-4 text-sm sm:text-base">{error}</div>
         )}
 
         {weatherData?.probabilities &&
           Object.keys(weatherData.probabilities).length > 0 && (
-            <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-white mb-6">
-              <h2 className="text-2xl mb-4 text-blue-200">
+            <div className="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg text-white mb-6">
+              <h2 className="text-xl sm:text-2xl mb-4 text-blue-200">
                 Probability Analysis
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                 {userThresholds.temperature !== null &&
                   weatherData.probabilities.temperature_above && (
-                    <div className="bg-gray-700 p-4 rounded-lg text-center">
-                      <h3 className="text-white font-semibold mb-2">
+                    <div className="bg-gray-700 p-3 sm:p-4 rounded-lg text-center">
+                      <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">
                         Temperature &gt; {userThresholds.temperature}°{tempUnit}
                       </h3>
-                      <div className="text-3xl font-bold text-orange-300">
+                      <div className="text-2xl sm:text-3xl font-bold text-orange-300">
                         {weatherData.probabilities.temperature_above}%
                       </div>
-                      <p className="text-sm text-gray-300 mt-2">
+                      <p className="text-xs sm:text-sm text-gray-300 mt-2">
                         Historical probability based on NASA data
                       </p>
                     </div>
@@ -787,14 +891,14 @@ export default function Home() {
 
                 {userThresholds.precipitation !== null &&
                   weatherData.probabilities.precipitation_above && (
-                    <div className="bg-gray-700 p-4 rounded-lg text-center">
-                      <h3 className="text-white font-semibold mb-2">
+                    <div className="bg-gray-700 p-3 sm:p-4 rounded-lg text-center">
+                      <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">
                         Precipitation &gt; {userThresholds.precipitation}mm
                       </h3>
-                      <div className="text-3xl font-bold text-blue-300">
+                      <div className="text-2xl sm:text-3xl font-bold text-blue-300">
                         {weatherData.probabilities.precipitation_above}%
                       </div>
-                      <p className="text-sm text-gray-300 mt-2">
+                      <p className="text-xs sm:text-sm text-gray-300 mt-2">
                         Chance of exceeding threshold
                       </p>
                     </div>
@@ -802,15 +906,15 @@ export default function Home() {
 
                 {userThresholds.windSpeed !== null &&
                   weatherData.probabilities.windspeed_above && (
-                    <div className="bg-gray-700 p-4 rounded-lg text-center">
-                      <h3 className="text-white font-semibold mb-2">
+                    <div className="bg-gray-700 p-3 sm:p-4 rounded-lg text-center">
+                      <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">
                         Wind Speed &gt; {userThresholds.windSpeed}
                         {windUnit}
                       </h3>
-                      <div className="text-3xl font-bold text-green-300">
+                      <div className="text-2xl sm:text-3xl font-bold text-green-300">
                         {weatherData.probabilities.windspeed_above}%
                       </div>
-                      <p className="text-sm text-gray-300 mt-2">
+                      <p className="text-xs sm:text-sm text-gray-300 mt-2">
                         Probability of windy conditions
                       </p>
                     </div>
@@ -820,7 +924,7 @@ export default function Home() {
               {Object.keys(userThresholds).filter(
                 (k) => userThresholds[k as keyof typeof userThresholds] !== null
               ).length === 0 && (
-                <div className="text-center text-gray-400 py-4">
+                <div className="text-center text-gray-400 py-4 text-sm sm:text-base">
                   Set thresholds above to see probability analysis
                 </div>
               )}
@@ -828,22 +932,20 @@ export default function Home() {
           )}
 
         {weatherData?.current && (
-          <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-white mb-6">
-            <h2 className="text-2xl mb-4 text-blue-200">
+          <div className="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg text-white mb-6">
+            <h2 className="text-xl sm:text-2xl mb-4 text-blue-200">
               Current Weather - {weatherData.location}
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-gray-700 p-4 rounded-lg text-center">
-                <h3 className="text-white font-semibold mb-2">Temperature</h3>
-                <p className="text-3xl font-bold text-blue-300">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+              <div className="bg-gray-700 p-3 sm:p-4 rounded-lg text-center">
+                <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">Temperature</h3>
+                <p className="text-xl sm:text-3xl font-bold text-blue-300">
                   {weatherData.current.temperature !== null &&
                   weatherData.current.temperature !== undefined
-                    ? `${weatherData.current.temperature.toFixed(
-                        1
-                      )}°${tempUnit}`
+                    ? `${weatherData.current.temperature.toFixed(1)}°${tempUnit}`
                     : "N/A"}
                 </p>
-                <p className="text-sm text-gray-300">
+                <p className="text-xs sm:text-sm text-gray-300">
                   Feels like:{" "}
                   {weatherData.current.feels_like !== null &&
                   weatherData.current.feels_like !== undefined
@@ -851,25 +953,25 @@ export default function Home() {
                     : "N/A"}
                 </p>
               </div>
-              <div className="bg-gray-700 p-4 rounded-lg text-center">
-                <h3 className="text-white font-semibold mb-2">Conditions</h3>
-                <p className="text-2xl font-bold text-green-300">
+              <div className="bg-gray-700 p-3 sm:p-4 rounded-lg text-center">
+                <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">Conditions</h3>
+                <p className="text-lg sm:text-2xl font-bold text-green-300">
                   {getWeatherIcon(weatherData.current.conditions)}{" "}
                   {weatherData.current.conditions || "N/A"}
                 </p>
               </div>
-              <div className="bg-gray-700 p-4 rounded-lg text-center">
-                <h3 className="text-white font-semibold mb-2">Wind</h3>
-                <p className="text-3xl font-bold text-yellow-300">
+              <div className="bg-gray-700 p-3 sm:p-4 rounded-lg text-center">
+                <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">Wind</h3>
+                <p className="text-xl sm:text-3xl font-bold text-yellow-300">
                   {weatherData.current.wind_speed !== null &&
                   weatherData.current.wind_speed !== undefined
                     ? `${weatherData.current.wind_speed.toFixed(1)} ${windUnit}`
                     : "N/A"}
                 </p>
               </div>
-              <div className="bg-gray-700 p-4 rounded-lg text-center">
-                <h3 className="text-white font-semibold mb-2">Humidity</h3>
-                <p className="text-3xl font-bold text-purple-300">
+              <div className="bg-gray-700 p-3 sm:p-4 rounded-lg text-center">
+                <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">Humidity</h3>
+                <p className="text-xl sm:text-3xl font-bold text-purple-300">
                   {weatherData.current.humidity !== null &&
                   weatherData.current.humidity !== undefined
                     ? `${weatherData.current.humidity}`
@@ -880,7 +982,7 @@ export default function Home() {
 
             {weatherData.data_source && (
               <div className="mt-4 p-3 bg-blue-900 rounded-lg">
-                <p className="text-sm text-blue-200">
+                <p className="text-xs sm:text-sm text-blue-200">
                   <strong>NASA Data Source:</strong> {weatherData.data_source}
                   {weatherData.nasa_mission &&
                     ` | Mission: ${weatherData.nasa_mission}`}
@@ -895,7 +997,7 @@ export default function Home() {
             <h3 className="text-lg font-semibold mb-2">
               Today's Activity Suitability
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               {suitability.map((s) => (
                 <div
                   key={s.activity}
@@ -905,8 +1007,8 @@ export default function Home() {
                       : "bg-red-900 text-red-200 hover:bg-red-800"
                   }`}
                 >
-                  <div className="font-semibold">{s.activity}</div>
-                  <div className="text-sm">
+                  <div className="font-semibold text-sm sm:text-base">{s.activity}</div>
+                  <div className="text-xs sm:text-sm">
                     {s.suitable
                       ? "✅ Suitable"
                       : `❌ Not suitable — ${
@@ -920,51 +1022,53 @@ export default function Home() {
         )}
 
         {weatherData?.forecast && (
-          <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-white mb-6">
-            <h2 className="text-2xl mb-4 text-blue-200">7-Day Forecast</h2>
+          <div className="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg text-white mb-6">
+            <h2 className="text-xl sm:text-2xl mb-4 text-blue-200">7-Day Forecast</h2>
 
             <div className="mb-6 bg-gray-700 p-4 rounded-lg">
-              <canvas id="forecastChart" className="w-full h-64"></canvas>
+              <div className="h-64 sm:h-80 md:h-96">
+                <canvas id="forecastChart" className="w-full h-full"></canvas>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-4">
               {weatherData.forecast.map((day, index) => (
                 <div
                   key={index}
-                  className="bg-gray-700 p-4 rounded-lg text-center hover:bg-gray-600 transition-colors"
+                  className="bg-gray-700 p-3 sm:p-4 rounded-lg text-center hover:bg-gray-600 transition-colors"
                 >
-                  <div className="font-semibold mb-2">
+                  <div className="font-semibold mb-2 text-sm sm:text-base">
                     {new Date(day.date).toLocaleDateString("en-US", {
                       weekday: "short",
                     })}
                   </div>
-                  <div className="text-sm text-gray-300 mb-2">
+                  <div className="text-xs sm:text-sm text-gray-300 mb-2">
                     {new Date(day.date).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
                     })}
                   </div>
-                  <div className="text-2xl mb-2">
+                  <div className="text-xl sm:text-2xl mb-2">
                     {getWeatherIcon(day.conditions)}
                   </div>
-                  <div className="text-lg font-bold text-blue-300">
+                  <div className="text-base sm:text-lg font-bold text-blue-300">
                     {day.max_temp !== null && day.max_temp !== undefined
                       ? `${day.max_temp.toFixed(0)}°${tempUnit}`
                       : "N/A"}
                   </div>
-                  <div className="text-sm text-gray-300">
+                  <div className="text-xs sm:text-sm text-gray-300">
                     {day.min_temp !== null && day.min_temp !== undefined
                       ? `${day.min_temp.toFixed(0)}°${tempUnit}`
                       : "N/A"}
                   </div>
-                  <div className="text-sm mt-2">
+                  <div className="text-xs sm:text-sm mt-2">
                     💧{" "}
                     {day.precipitation !== null &&
                     day.precipitation !== undefined
                       ? `${day.precipitation.toFixed(1)}mm`
                       : "N/A"}
                   </div>
-                  <div className="text-sm">
+                  <div className="text-xs sm:text-sm">
                     💨{" "}
                     {day.wind_speed !== null && day.wind_speed !== undefined
                       ? `${day.wind_speed.toFixed(1)}${windUnit}`
