@@ -64,7 +64,11 @@ declare global {
 
 export default function Home() {
   const [scriptsLoaded, setScriptsLoaded] = useState(false);
-  const [location, setLocation] = useState<Location>({ lat: 40.7128, lon: -74.0060, name: "New York" });
+  const [location, setLocation] = useState<Location>({
+    lat: 40.7128,
+    lon: -74.006,
+    name: "New York",
+  });
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -96,51 +100,67 @@ export default function Home() {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000]">
       <div className="bg-gray-800 p-6 rounded-lg w-96 max-w-90vw mx-4">
         <h3 className="text-xl mb-4 text-white">Set Weather Thresholds</h3>
-        
+
         <div className="space-y-4">
           <div>
-            <label className="text-white block mb-2">Temperature above (°{tempUnit})</label>
+            <label className="text-white block mb-2">
+              Temperature above (°{tempUnit})
+            </label>
             <input
               type="number"
               className="w-full bg-gray-700 text-white p-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
-              placeholder={`e.g., ${tempUnit === 'C' ? '30' : '86'}`}
-              value={userThresholds.temperature || ''}
-              onChange={(e) => setUserThresholds(prev => ({
-                ...prev,
-                temperature: e.target.value ? parseFloat(e.target.value) : null
-              }))}
+              placeholder={`e.g., ${tempUnit === "C" ? "30" : "86"}`}
+              value={userThresholds.temperature || ""}
+              onChange={(e) =>
+                setUserThresholds((prev) => ({
+                  ...prev,
+                  temperature: e.target.value
+                    ? parseFloat(e.target.value)
+                    : null,
+                }))
+              }
             />
           </div>
-          
+
           <div>
-            <label className="text-white block mb-2">Precipitation above (mm)</label>
+            <label className="text-white block mb-2">
+              Precipitation above (mm)
+            </label>
             <input
               type="number"
               className="w-full bg-gray-700 text-white p-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
               placeholder="e.g., 5"
-              value={userThresholds.precipitation || ''}
-              onChange={(e) => setUserThresholds(prev => ({
-                ...prev,
-                precipitation: e.target.value ? parseFloat(e.target.value) : null
-              }))}
+              value={userThresholds.precipitation || ""}
+              onChange={(e) =>
+                setUserThresholds((prev) => ({
+                  ...prev,
+                  precipitation: e.target.value
+                    ? parseFloat(e.target.value)
+                    : null,
+                }))
+              }
             />
           </div>
-          
+
           <div>
-            <label className="text-white block mb-2">Wind Speed above ({windUnit})</label>
+            <label className="text-white block mb-2">
+              Wind Speed above ({windUnit})
+            </label>
             <input
               type="number"
               className="w-full bg-gray-700 text-white p-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
               placeholder="e.g., 10"
-              value={userThresholds.windSpeed || ''}
-              onChange={(e) => setUserThresholds(prev => ({
-                ...prev,
-                windSpeed: e.target.value ? parseFloat(e.target.value) : null
-              }))}
+              value={userThresholds.windSpeed || ""}
+              onChange={(e) =>
+                setUserThresholds((prev) => ({
+                  ...prev,
+                  windSpeed: e.target.value ? parseFloat(e.target.value) : null,
+                }))
+              }
             />
           </div>
         </div>
-        
+
         <div className="flex gap-2 mt-6">
           <button
             className="flex-1 bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition-colors"
@@ -193,7 +213,7 @@ export default function Home() {
       getWeatherForecast(location.lat, location.lon);
       return;
     }
-    
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const lat = pos.coords.latitude;
@@ -217,7 +237,9 @@ export default function Home() {
       attribution: "&copy; OpenStreetMap contributors",
     }).addTo(map);
 
-    const marker = window.L.marker([location.lat, location.lon], { draggable: true }).addTo(map);
+    const marker = window.L.marker([location.lat, location.lon], {
+      draggable: true,
+    }).addTo(map);
     markerRef.current = marker;
     mapRef.current = map;
 
@@ -265,32 +287,32 @@ export default function Home() {
       // Build query parameters
       const params = new URLSearchParams({
         lat: fetchLat.toString(),
-        lon: fetchLon.toString()
+        lon: fetchLon.toString(),
       });
 
       // Add thresholds if any are set
       const activeThresholds = Object.fromEntries(
         Object.entries(userThresholds).filter(([_, value]) => value !== null)
       );
-      
+
       if (Object.keys(activeThresholds).length > 0) {
-        params.append('thresholds', JSON.stringify(activeThresholds));
+        params.append("thresholds", JSON.stringify(activeThresholds));
       }
 
       const res = await fetch(
         `${API_BASE_URL}/api/v1/weather?${params.toString()}`
       );
-      
+
       if (!res.ok) {
         const text = await res.text();
         throw new Error(`API error: ${res.status} ${res.statusText}`);
       }
-      
+
       const payload = await res.json();
 
-      const convertTemp = (temp: number) => 
+      const convertTemp = (temp: number) =>
         tempUnit === "F" ? (temp * 9) / 5 + 32 : temp;
-      
+
       const convertWind = (wind: number) => {
         if (windUnit === "km/h") return wind * 3.6;
         if (windUnit === "mph") return wind * 2.237;
@@ -304,13 +326,17 @@ export default function Home() {
         min_temp: convertTemp(day.min_temp),
         wind_speed: convertWind(day.wind_speed),
         humidity: day.humidity,
-        feels_like: day.feels_like ? convertTemp(day.feels_like) : convertTemp(day.temperature)
+        feels_like: day.feels_like
+          ? convertTemp(day.feels_like)
+          : convertTemp(day.temperature),
       }));
 
       const convertedCurrent = {
         ...payload.current,
         temperature: convertTemp(payload.current.temperature),
-        feels_like: payload.current.feels_like ? convertTemp(payload.current.feels_like) : convertTemp(payload.current.temperature),
+        feels_like: payload.current.feels_like
+          ? convertTemp(payload.current.feels_like)
+          : convertTemp(payload.current.temperature),
         wind_speed: convertWind(payload.current.wind_speed),
         humidity: payload.current.humidity,
       };
@@ -322,7 +348,7 @@ export default function Home() {
         data_source: payload.data_source,
         nasa_mission: payload.nasa_mission,
         probabilities: payload.probabilities,
-        user_thresholds: payload.user_thresholds
+        user_thresholds: payload.user_thresholds,
       });
       setError("");
     } catch (err: unknown) {
@@ -336,20 +362,26 @@ export default function Home() {
 
   useEffect(() => {
     if (!weatherData?.forecast || !window.Chart || !scriptsLoaded) return;
-    
-    const canvas = document.getElementById("forecastChart") as HTMLCanvasElement | null;
+
+    const canvas = document.getElementById(
+      "forecastChart"
+    ) as HTMLCanvasElement | null;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const labels = weatherData.forecast.map(d => {
+    const labels = weatherData.forecast.map((d) => {
       const date = new Date(d.date);
-      return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      return date.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
     });
-    
-    const maxTemps = weatherData.forecast.map(d => d.max_temp || 0);
-    const minTemps = weatherData.forecast.map(d => d.min_temp || 0);
-    const precip = weatherData.forecast.map(d => d.precipitation || 0);
+
+    const maxTemps = weatherData.forecast.map((d) => d.max_temp || 0);
+    const minTemps = weatherData.forecast.map((d) => d.min_temp || 0);
+    const precip = weatherData.forecast.map((d) => d.precipitation || 0);
 
     if (chartRef.current) {
       chartRef.current.data.labels = labels;
@@ -361,99 +393,99 @@ export default function Home() {
     }
 
     chartRef.current = new window.Chart(ctx, {
-      type: 'line',
+      type: "line",
       data: {
         labels,
         datasets: [
           {
             label: `Max Temp (°${tempUnit})`,
             data: maxTemps,
-            borderColor: 'rgb(255, 99, 132)',
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            yAxisID: 'y',
-            tension: 0.4
+            borderColor: "rgb(255, 99, 132)",
+            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            yAxisID: "y",
+            tension: 0.4,
           },
           {
             label: `Min Temp (°${tempUnit})`,
             data: minTemps,
-            borderColor: 'rgb(54, 162, 235)',
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            yAxisID: 'y',
-            tension: 0.4
+            borderColor: "rgb(54, 162, 235)",
+            backgroundColor: "rgba(54, 162, 235, 0.2)",
+            yAxisID: "y",
+            tension: 0.4,
           },
           {
-            label: 'Precipitation (mm)',
+            label: "Precipitation (mm)",
             data: precip,
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            yAxisID: 'y1',
+            borderColor: "rgb(75, 192, 192)",
+            backgroundColor: "rgba(75, 192, 192, 0.2)",
+            yAxisID: "y1",
             tension: 0.4,
-            type: 'bar'
-          }
-        ]
+            type: "bar",
+          },
+        ],
       },
       options: {
         responsive: true,
         interaction: {
-          mode: 'index',
+          mode: "index",
           intersect: false,
         },
         plugins: {
-          legend: { 
-            labels: { color: theme === "light" ? "#000" : "#fff" }
+          legend: {
+            labels: { color: theme === "light" ? "#000" : "#fff" },
           },
           title: {
             display: true,
-            text: '7-Day Forecast',
-            color: theme === "light" ? "#000" : "#fff"
-          }
+            text: "7-Day Forecast",
+            color: theme === "light" ? "#000" : "#fff",
+          },
         },
         scales: {
-          x: { 
-            ticks: { color: theme === "light" ? "#000" : "#fff" }, 
-            grid: { color: "#444" } 
+          x: {
+            ticks: { color: theme === "light" ? "#000" : "#fff" },
+            grid: { color: "#444" },
           },
           y: {
-            type: 'linear',
+            type: "linear",
             display: true,
-            position: 'left',
+            position: "left",
             ticks: { color: theme === "light" ? "#000" : "#fff" },
             grid: { color: "#444" },
             title: {
               display: true,
               text: `Temperature (°${tempUnit})`,
-              color: theme === "light" ? "#000" : "#fff"
-            }
+              color: theme === "light" ? "#000" : "#fff",
+            },
           },
           y1: {
-            type: 'linear',
+            type: "linear",
             display: true,
-            position: 'right',
+            position: "right",
             ticks: { color: theme === "light" ? "#000" : "#fff" },
             grid: { drawOnChartArea: false, color: "#444" },
             title: {
               display: true,
-              text: 'Precipitation (mm)',
-              color: theme === "light" ? "#000" : "#fff"
-            }
+              text: "Precipitation (mm)",
+              color: theme === "light" ? "#000" : "#fff",
+            },
           },
         },
       },
     });
   }, [weatherData, tempUnit, scriptsLoaded, theme]);
 
-  const downloadData = async (format: 'csv' | 'json') => {
+  const downloadData = async (format: "csv" | "json") => {
     try {
       const response = await fetch(
         `${API_BASE_URL}/api/v1/weather/download?lat=${location.lat}&lon=${location.lon}&format=${format}`
       );
-      
-      if (!response.ok) throw new Error('Download failed');
-      
-      if (format === 'csv') {
+
+      if (!response.ok) throw new Error("Download failed");
+
+      if (format === "csv") {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
         a.download = `nasa_weather_${location.lat}_${location.lon}.csv`;
         document.body.appendChild(a);
@@ -462,9 +494,11 @@ export default function Home() {
         window.URL.revokeObjectURL(url);
       } else {
         const data = await response.json();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
         a.download = `nasa_weather_${location.lat}_${location.lon}.json`;
         document.body.appendChild(a);
@@ -473,7 +507,7 @@ export default function Home() {
         window.URL.revokeObjectURL(url);
       }
     } catch (error) {
-      setError('Download failed: ' + (error as Error).message);
+      setError("Download failed: " + (error as Error).message);
     }
   };
 
@@ -481,7 +515,9 @@ export default function Home() {
     if (!searchQuery.trim()) return;
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=6`
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+          searchQuery
+        )}&format=json&limit=6`
       );
       const data = await res.json();
       const results: Location[] = data.map((it: any) => ({
@@ -507,52 +543,69 @@ export default function Home() {
 
   const getTodaysSuitability = () => {
     if (!weatherData?.forecast?.[0]) return null;
-    
+
     const today = weatherData.forecast[0];
-    
+
     // Helper to extract numeric humidity value
     const getHumidityValue = (humidity: string | number): number => {
-      if (typeof humidity === 'number') return humidity;
-      if (typeof humidity === 'string') {
-        return parseFloat(humidity.replace('%', '')) || 0;
+      if (typeof humidity === "number") return humidity;
+      if (typeof humidity === "string") {
+        return parseFloat(humidity.replace("%", "")) || 0;
       }
       return 0;
     };
 
     const humidityValue = getHumidityValue(today.humidity);
-    
-    const result: { activity: string; suitable: boolean; reason?: string }[] = [];
 
-    const hikingBad = (today.precipitation || 0) > 2 || (today.wind_speed || 0) > 8 || (today.max_temp || 0) > (tempUnit === "F" ? 95 : 35);
+    const result: { activity: string; suitable: boolean; reason?: string }[] =
+      [];
+
+    const hikingBad =
+      (today.precipitation || 0) > 2 ||
+      (today.wind_speed || 0) > 8 ||
+      (today.max_temp || 0) > (tempUnit === "F" ? 95 : 35);
     result.push({
       activity: "Hiking",
       suitable: !hikingBad,
-      reason: hikingBad ? 
-        ((today.precipitation || 0) > 2 ? "Rain expected" : 
-         (today.wind_speed || 0) > 8 ? "Too windy" : "Too hot") : undefined
+      reason: hikingBad
+        ? (today.precipitation || 0) > 2
+          ? "Rain expected"
+          : (today.wind_speed || 0) > 8
+          ? "Too windy"
+          : "Too hot"
+        : undefined,
     });
 
-    const beachBad = (today.precipitation || 0) > 1 || (today.max_temp || 0) < (tempUnit === "F" ? 70 : 21);
+    const beachBad =
+      (today.precipitation || 0) > 1 ||
+      (today.max_temp || 0) < (tempUnit === "F" ? 70 : 21);
     result.push({
       activity: "Beach",
       suitable: !beachBad,
-      reason: beachBad ? 
-        ((today.precipitation || 0) > 1 ? "Rain expected" : "Too cool") : undefined
+      reason: beachBad
+        ? (today.precipitation || 0) > 1
+          ? "Rain expected"
+          : "Too cool"
+        : undefined,
     });
 
-    const cyclingBad = (today.precipitation || 0) > 2 || (today.wind_speed || 0) > 12;
+    const cyclingBad =
+      (today.precipitation || 0) > 2 || (today.wind_speed || 0) > 12;
     result.push({
       activity: "Cycling",
       suitable: !cyclingBad,
-      reason: cyclingBad ? 
-        ((today.precipitation || 0) > 2 ? "Rain expected" : "Too windy") : undefined
+      reason: cyclingBad
+        ? (today.precipitation || 0) > 2
+          ? "Rain expected"
+          : "Too windy"
+        : undefined,
     });
 
     const eventBad = (today.precipitation || 0) > 3;
     result.push({
       activity: "Outdoor Event",
       suitable: !eventBad,
-      reason: eventBad ? "High chance of rain" : undefined
+      reason: eventBad ? "High chance of rain" : undefined,
     });
 
     return result;
@@ -561,30 +614,32 @@ export default function Home() {
   const suitability = getTodaysSuitability();
 
   const themeClass =
-    theme === "light" ? "bg-gray-100 text-black" : theme === "blue" ? "bg-blue-900 text-white" : "bg-gray-900 text-white";
+    theme === "light"
+      ? "bg-gray-100 text-black"
+      : theme === "blue"
+      ? "bg-blue-900 text-white"
+      : "bg-gray-900 text-white";
 
   const getWeatherIcon = (conditions: string) => {
-    if (!conditions) return '🌈';
-    if (conditions.includes('Clear')) return '☀️';
-    if (conditions.includes('Cloud')) return '☁️';
-    if (conditions.includes('Rain') || conditions.includes('Shower')) return '🌧️';
-    if (conditions.includes('Thunderstorm')) return '⛈️';
-    if (conditions.includes('Snow')) return '❄️';
-    if (conditions.includes('Mist') || conditions.includes('Fog')) return '🌫️';
-    if (conditions.includes('Drizzle')) return '🌦️';
-    return '🌈';
+    if (!conditions) return "🌈";
+    if (conditions.includes("Clear")) return "☀️";
+    if (conditions.includes("Cloud")) return "☁️";
+    if (conditions.includes("Rain") || conditions.includes("Shower"))
+      return "🌧️";
+    if (conditions.includes("Thunderstorm")) return "⛈️";
+    if (conditions.includes("Snow")) return "❄️";
+    if (conditions.includes("Mist") || conditions.includes("Fog")) return "🌫️";
+    if (conditions.includes("Drizzle")) return "🌦️";
+    return "🌈";
   };
 
   return (
     <>
-      <Head>
-        <title>NASA Weather Forecast</title>
-        <meta name="description" content="Weather forecast powered by NASA data" />
-      </Head>
-
-      <div className={`${themeClass} min-h-screen p-4 transition-colors duration-300`}>
+      <div
+        className={`${themeClass} min-h-screen p-4 transition-colors duration-300`}
+      >
         <div className="fixed top-4 right-4 z-[1000] flex gap-2">
-          <button 
+          <button
             className="p-2 bg-gray-700 rounded-md text-white hover:bg-gray-600 transition-colors"
             onClick={() => setMenuOpen(true)}
             aria-label="Open menu"
@@ -592,7 +647,7 @@ export default function Home() {
             ☰
           </button>
           {menuOpen && (
-            <button 
+            <button
               className="p-2 bg-red-600 rounded-md text-white hover:bg-red-700 transition-colors"
               onClick={() => setMenuOpen(false)}
               aria-label="Close menu"
@@ -610,9 +665,9 @@ export default function Home() {
           <h3 className="text-lg mb-4 font-semibold text-white">Settings</h3>
           <div className="mb-4">
             <label className="text-white mr-2">Temp Unit:</label>
-            <select 
+            <select
               className="bg-gray-700 p-1 rounded w-full text-white border border-gray-600"
-              value={tempUnit} 
+              value={tempUnit}
               onChange={(e) => setTempUnit(e.target.value as "C" | "F")}
             >
               <option value="C">°C</option>
@@ -621,10 +676,12 @@ export default function Home() {
           </div>
           <div className="mb-4">
             <label className="text-white mr-2">Wind Unit:</label>
-            <select 
+            <select
               className="bg-gray-700 p-1 rounded w-full text-white border border-gray-600"
-              value={windUnit} 
-              onChange={(e) => setWindUnit(e.target.value as "m/s" | "km/h" | "mph")}
+              value={windUnit}
+              onChange={(e) =>
+                setWindUnit(e.target.value as "m/s" | "km/h" | "mph")
+              }
             >
               <option value="m/s">m/s</option>
               <option value="km/h">km/h</option>
@@ -637,7 +694,9 @@ export default function Home() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col justify-start text-white">
-            <h2 className="text-2xl font-semibold mb-4 text-blue-200">NASA Weather Dashboard</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-blue-200">
+              Weather Dashboard
+            </h2>
 
             <input
               type="text"
@@ -649,7 +708,7 @@ export default function Home() {
             />
 
             <div className="flex gap-2 mb-3">
-              <button 
+              <button
                 className="flex-1 bg-blue-600 hover:bg-blue-700 p-2 rounded transition-colors"
                 onClick={handleSearch}
               >
@@ -685,13 +744,15 @@ export default function Home() {
             {suggestions.length > 0 && (
               <div className="bg-gray-700 rounded mb-4 max-h-40 overflow-y-auto border border-gray-600">
                 {suggestions.map((s, i) => (
-                  <div 
-                    key={i} 
+                  <div
+                    key={i}
                     className="p-2 hover:bg-blue-600 cursor-pointer text-white border-b border-gray-600 last:border-b-0"
                     onClick={() => selectSuggestion(s)}
                   >
                     {s.name}
-                    <div className="text-xs text-gray-300">{s.lat.toFixed(4)}, {s.lon.toFixed(4)}</div>
+                    <div className="text-xs text-gray-300">
+                      {s.lat.toFixed(4)}, {s.lon.toFixed(4)}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -701,7 +762,12 @@ export default function Home() {
               <p>Latitude: {location.lat.toFixed(4)}</p>
               <p>Longitude: {location.lon.toFixed(4)}</p>
               <br />
-              <p className="mt-4 rounded bg-yellow-900 text-yellow-300 p-2 font-semibold text-center"> Please note that the data shown below might not be accurate.</p>
+              <p className="mt-4 rounded bg-yellow-900 text-yellow-300 p-2 font-semibold text-center">
+                NASA Earth Data Dashboard: Combines POWER satellite observations
+                with climate modeling. Probability features demonstrate analysis
+                of historical weather patterns. Data latency 1-2 days for
+                processing.
+              </p>
             </div>
 
             <div className="flex gap-2 mb-3">
@@ -723,21 +789,21 @@ export default function Home() {
             <div className="flex gap-2">
               <button
                 className="flex-1 bg-green-600 hover:bg-green-700 p-2 rounded text-white transition-colors"
-                onClick={() => downloadData('csv')}
+                onClick={() => downloadData("csv")}
               >
                 Download CSV
               </button>
               <button
                 className="flex-1 bg-indigo-600 hover:bg-indigo-700 p-2 rounded text-white transition-colors"
-                onClick={() => downloadData('json')}
+                onClick={() => downloadData("json")}
               >
                 Download JSON
               </button>
             </div>
           </div>
 
-          <div 
-            id="map" 
+          <div
+            id="map"
             className="shadow-lg bg-gray-700 rounded-lg h-96 flex items-center justify-center relative z-0"
           >
             {!scriptsLoaded && (
@@ -747,112 +813,130 @@ export default function Home() {
         </div>
 
         {error && (
-          <div className="bg-red-700 p-3 rounded text-white mb-4">
-            {error}
-          </div>
+          <div className="bg-red-700 p-3 rounded text-white mb-4">{error}</div>
         )}
 
-        {weatherData?.probabilities && Object.keys(weatherData.probabilities).length > 0 && (
-          <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-white mb-6">
-            <h2 className="text-2xl mb-4 text-blue-200">Probability Analysis</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {userThresholds.temperature !== null && weatherData.probabilities.temperature_above && (
-                <div className="bg-gray-700 p-4 rounded-lg text-center">
-                  <h3 className="text-white font-semibold mb-2">
-                    Temperature &gt; {userThresholds.temperature}°{tempUnit}
-                  </h3>
-                  <div className="text-3xl font-bold text-orange-300">
-                    {weatherData.probabilities.temperature_above}%
-                  </div>
-                  <p className="text-sm text-gray-300 mt-2">
-                    Historical probability based on NASA data
-                  </p>
-                </div>
-              )}
-              
-              {userThresholds.precipitation !== null && weatherData.probabilities.precipitation_above && (
-                <div className="bg-gray-700 p-4 rounded-lg text-center">
-                  <h3 className="text-white font-semibold mb-2">
-                    Precipitation &gt; {userThresholds.precipitation}mm
-                  </h3>
-                  <div className="text-3xl font-bold text-blue-300">
-                    {weatherData.probabilities.precipitation_above}%
-                  </div>
-                  <p className="text-sm text-gray-300 mt-2">
-                    Chance of exceeding threshold
-                  </p>
-                </div>
-              )}
-              
-              {userThresholds.windSpeed !== null && weatherData.probabilities.windspeed_above && (
-                <div className="bg-gray-700 p-4 rounded-lg text-center">
-                  <h3 className="text-white font-semibold mb-2">
-                    Wind Speed &gt; {userThresholds.windSpeed}{windUnit}
-                  </h3>
-                  <div className="text-3xl font-bold text-green-300">
-                    {weatherData.probabilities.windspeed_above}%
-                  </div>
-                  <p className="text-sm text-gray-300 mt-2">
-                    Probability of windy conditions
-                  </p>
+        {weatherData?.probabilities &&
+          Object.keys(weatherData.probabilities).length > 0 && (
+            <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-white mb-6">
+              <h2 className="text-2xl mb-4 text-blue-200">
+                Probability Analysis
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {userThresholds.temperature !== null &&
+                  weatherData.probabilities.temperature_above && (
+                    <div className="bg-gray-700 p-4 rounded-lg text-center">
+                      <h3 className="text-white font-semibold mb-2">
+                        Temperature &gt; {userThresholds.temperature}°{tempUnit}
+                      </h3>
+                      <div className="text-3xl font-bold text-orange-300">
+                        {weatherData.probabilities.temperature_above}%
+                      </div>
+                      <p className="text-sm text-gray-300 mt-2">
+                        Historical probability based on NASA data
+                      </p>
+                    </div>
+                  )}
+
+                {userThresholds.precipitation !== null &&
+                  weatherData.probabilities.precipitation_above && (
+                    <div className="bg-gray-700 p-4 rounded-lg text-center">
+                      <h3 className="text-white font-semibold mb-2">
+                        Precipitation &gt; {userThresholds.precipitation}mm
+                      </h3>
+                      <div className="text-3xl font-bold text-blue-300">
+                        {weatherData.probabilities.precipitation_above}%
+                      </div>
+                      <p className="text-sm text-gray-300 mt-2">
+                        Chance of exceeding threshold
+                      </p>
+                    </div>
+                  )}
+
+                {userThresholds.windSpeed !== null &&
+                  weatherData.probabilities.windspeed_above && (
+                    <div className="bg-gray-700 p-4 rounded-lg text-center">
+                      <h3 className="text-white font-semibold mb-2">
+                        Wind Speed &gt; {userThresholds.windSpeed}
+                        {windUnit}
+                      </h3>
+                      <div className="text-3xl font-bold text-green-300">
+                        {weatherData.probabilities.windspeed_above}%
+                      </div>
+                      <p className="text-sm text-gray-300 mt-2">
+                        Probability of windy conditions
+                      </p>
+                    </div>
+                  )}
+              </div>
+
+              {Object.keys(userThresholds).filter(
+                (k) => userThresholds[k as keyof typeof userThresholds] !== null
+              ).length === 0 && (
+                <div className="text-center text-gray-400 py-4">
+                  Set thresholds above to see probability analysis
                 </div>
               )}
             </div>
-            
-            {Object.keys(userThresholds).filter(k => userThresholds[k as keyof typeof userThresholds] !== null).length === 0 && (
-              <div className="text-center text-gray-400 py-4">
-                Set thresholds above to see probability analysis
-              </div>
-            )}
-          </div>
-        )}
+          )}
 
         {weatherData?.current && (
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-white mb-6">
-            <h2 className="text-2xl mb-4 text-blue-200">Current Weather - {weatherData.location}</h2>
+            <h2 className="text-2xl mb-4 text-blue-200">
+              Current Weather - {weatherData.location}
+            </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-gray-700 p-4 rounded-lg text-center">
                 <h3 className="text-white font-semibold mb-2">Temperature</h3>
                 <p className="text-3xl font-bold text-blue-300">
-                  {weatherData.current.temperature !== null && weatherData.current.temperature !== undefined 
-                    ? `${weatherData.current.temperature.toFixed(1)}°${tempUnit}`
-                    : 'N/A'}
+                  {weatherData.current.temperature !== null &&
+                  weatherData.current.temperature !== undefined
+                    ? `${weatherData.current.temperature.toFixed(
+                        1
+                      )}°${tempUnit}`
+                    : "N/A"}
                 </p>
                 <p className="text-sm text-gray-300">
-                  Feels like: {weatherData.current.feels_like !== null && weatherData.current.feels_like !== undefined 
+                  Feels like:{" "}
+                  {weatherData.current.feels_like !== null &&
+                  weatherData.current.feels_like !== undefined
                     ? `${weatherData.current.feels_like.toFixed(1)}°${tempUnit}`
-                    : 'N/A'}
+                    : "N/A"}
                 </p>
               </div>
               <div className="bg-gray-700 p-4 rounded-lg text-center">
                 <h3 className="text-white font-semibold mb-2">Conditions</h3>
                 <p className="text-2xl font-bold text-green-300">
-                  {getWeatherIcon(weatherData.current.conditions)} {weatherData.current.conditions || 'N/A'}
+                  {getWeatherIcon(weatherData.current.conditions)}{" "}
+                  {weatherData.current.conditions || "N/A"}
                 </p>
               </div>
               <div className="bg-gray-700 p-4 rounded-lg text-center">
                 <h3 className="text-white font-semibold mb-2">Wind</h3>
                 <p className="text-3xl font-bold text-yellow-300">
-                  {weatherData.current.wind_speed !== null && weatherData.current.wind_speed !== undefined 
+                  {weatherData.current.wind_speed !== null &&
+                  weatherData.current.wind_speed !== undefined
                     ? `${weatherData.current.wind_speed.toFixed(1)} ${windUnit}`
-                    : 'N/A'}
+                    : "N/A"}
                 </p>
               </div>
               <div className="bg-gray-700 p-4 rounded-lg text-center">
                 <h3 className="text-white font-semibold mb-2">Humidity</h3>
                 <p className="text-3xl font-bold text-purple-300">
-                  {weatherData.current.humidity !== null && weatherData.current.humidity !== undefined 
+                  {weatherData.current.humidity !== null &&
+                  weatherData.current.humidity !== undefined
                     ? `${weatherData.current.humidity}`
-                    : 'N/A'}
+                    : "N/A"}
                 </p>
               </div>
             </div>
-            
+
             {weatherData.data_source && (
               <div className="mt-4 p-3 bg-blue-900 rounded-lg">
                 <p className="text-sm text-blue-200">
                   <strong>NASA Data Source:</strong> {weatherData.data_source}
-                  {weatherData.nasa_mission && ` | Mission: ${weatherData.nasa_mission}`}
+                  {weatherData.nasa_mission &&
+                    ` | Mission: ${weatherData.nasa_mission}`}
                 </p>
               </div>
             )}
@@ -861,18 +945,26 @@ export default function Home() {
 
         {suitability && (
           <div className="mt-6 bg-gray-700 p-4 rounded">
-            <h3 className="text-lg font-semibold mb-2">Today's Activity Suitability</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              Today's Activity Suitability
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {suitability.map((s) => (
-                <div 
-                  key={s.activity} 
+                <div
+                  key={s.activity}
                   className={`p-3 rounded transition-colors ${
-                    s.suitable ? "bg-green-900 text-green-200 hover:bg-green-800" : "bg-red-900 text-red-200 hover:bg-red-800"
+                    s.suitable
+                      ? "bg-green-900 text-green-200 hover:bg-green-800"
+                      : "bg-red-900 text-red-200 hover:bg-red-800"
                   }`}
                 >
                   <div className="font-semibold">{s.activity}</div>
                   <div className="text-sm">
-                    {s.suitable ? "✅ Suitable" : `❌ Not suitable — ${s.reason ?? "conditions unfavorable"}`}
+                    {s.suitable
+                      ? "✅ Suitable"
+                      : `❌ Not suitable — ${
+                          s.reason ?? "conditions unfavorable"
+                        }`}
                   </div>
                 </div>
               ))}
@@ -883,42 +975,57 @@ export default function Home() {
         {weatherData?.forecast && (
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-white mb-6">
             <h2 className="text-2xl mb-4 text-blue-200">7-Day Forecast</h2>
-            
+
             <div className="mb-6 bg-gray-700 p-4 rounded-lg">
               <canvas id="forecastChart" className="w-full h-64"></canvas>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
               {weatherData.forecast.map((day, index) => (
-                <div key={index} className="bg-gray-700 p-4 rounded-lg text-center hover:bg-gray-600 transition-colors">
+                <div
+                  key={index}
+                  className="bg-gray-700 p-4 rounded-lg text-center hover:bg-gray-600 transition-colors"
+                >
                   <div className="font-semibold mb-2">
-                    {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}
+                    {new Date(day.date).toLocaleDateString("en-US", {
+                      weekday: "short",
+                    })}
                   </div>
                   <div className="text-sm text-gray-300 mb-2">
-                    {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {new Date(day.date).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
                   </div>
-                  <div className="text-2xl mb-2">{getWeatherIcon(day.conditions)}</div>
+                  <div className="text-2xl mb-2">
+                    {getWeatherIcon(day.conditions)}
+                  </div>
                   <div className="text-lg font-bold text-blue-300">
-                    {day.max_temp !== null && day.max_temp !== undefined 
+                    {day.max_temp !== null && day.max_temp !== undefined
                       ? `${day.max_temp.toFixed(0)}°${tempUnit}`
-                      : 'N/A'}
+                      : "N/A"}
                   </div>
                   <div className="text-sm text-gray-300">
-                    {day.min_temp !== null && day.min_temp !== undefined 
+                    {day.min_temp !== null && day.min_temp !== undefined
                       ? `${day.min_temp.toFixed(0)}°${tempUnit}`
-                      : 'N/A'}
+                      : "N/A"}
                   </div>
                   <div className="text-sm mt-2">
-                    💧 {day.precipitation !== null && day.precipitation !== undefined 
+                    💧{" "}
+                    {day.precipitation !== null &&
+                    day.precipitation !== undefined
                       ? `${day.precipitation.toFixed(1)}mm`
-                      : 'N/A'}
+                      : "N/A"}
                   </div>
                   <div className="text-sm">
-                    💨 {day.wind_speed !== null && day.wind_speed !== undefined 
+                    💨{" "}
+                    {day.wind_speed !== null && day.wind_speed !== undefined
                       ? `${day.wind_speed.toFixed(1)}${windUnit}`
-                      : 'N/A'}
+                      : "N/A"}
                   </div>
-                  <div className="text-xs text-gray-400 mt-2">{day.conditions || 'N/A'}</div>
+                  <div className="text-xs text-gray-400 mt-2">
+                    {day.conditions || "N/A"}
+                  </div>
                 </div>
               ))}
             </div>
