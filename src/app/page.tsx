@@ -763,10 +763,8 @@ export default function Home() {
               <p>Longitude: {location.lon.toFixed(4)}</p>
               <br />
               <p className="mt-4 rounded bg-yellow-900 text-yellow-300 p-2 font-semibold text-center">
-                NASA Earth Data Dashboard: Combines POWER satellite observations
-                with climate modeling. Probability features demonstrate analysis
-                of historical weather patterns. Data latency 1-2 days for
-                processing.
+                Please note: Weather data combines NASA satellite observations
+                with climate models and may not reflect real-time conditions.
               </p>
             </div>
 
