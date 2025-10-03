@@ -162,7 +162,7 @@ export default function Home() {
 
     try {
       const res = await fetch(
-        `http://localhost:5443/api/v1/weather?lat=${fetchLat}&lon=${fetchLon}&date=${fetchDate}`
+        `https://api.sharkybytes.xyz/api/v1/weather?lat=${fetchLat}&lon=${fetchLon}&date=${fetchDate}`
       );
       if (!res.ok) {
         // try to read JSON if available for better error
@@ -414,7 +414,7 @@ export default function Home() {
       <div className={`${themeClass} min-h-screen p-4 transition-colors duration-300`}>
         {/* hamburger + close */}
         <div className="fixed top-4 right-4 z-[100] flex gap-2">
-          <button className="p-2 bg-gray-700 rounded-md text-white" onClick={() => setMenuOpen(true)}>
+          <button className="p-2 bg-gray-700 rounded-md text-white z-[100]" onClick={() => setMenuOpen(true)}>
             ☰
           </button>
           {menuOpen && (
@@ -431,14 +431,6 @@ export default function Home() {
           }`}
         >
           <h3 className="text-lg mb-4 font-semibold text-white">Settings</h3>
-          <div className="mb-4">
-            <label className="text-white mr-2">Theme:</label>
-            <select className="bg-gray-700 p-1 rounded w-full text-white" value={theme} onChange={(e) => setTheme(e.target.value as any)}>
-              <option value="dark">Dark</option>
-              <option value="light">Light</option>
-              <option value="blue">Blue</option>
-            </select>
-          </div>
           <div className="mb-4">
             <label className="text-white mr-2">Temp:</label>
             <select className="bg-gray-700 p-1 rounded w-full text-white" value={tempUnit} onChange={(e) => setTempUnit(e.target.value as any)}>
@@ -536,6 +528,23 @@ export default function Home() {
 
         {error && <div className="bg-red-700 p-3 rounded text-white mb-4">{error}</div>}
 
+        {/* Summary box */}
+            <div className="mt-6 bg-gray-700 p-4 rounded">
+              <h3 className="text-lg font-semibold mb-2">Suitability summary</h3>
+              {summary && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {summary.map((s) => (
+                    <div key={s.activity} className={`p-3 rounded ${s.suitable ? "bg-green-900 text-green-200" : "bg-red-900 text-red-200"}`}>
+                      <div className="font-semibold">{s.activity}</div>
+                      <div className="text-sm">
+                        {s.suitable ? "Suitable" : `Not suitable — ${s.reason ?? "conditions unfavourable"}`}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
         {analysis && (
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-white mb-6">
             <h2 className="text-xl mb-4 text-blue-200">Weather Profile (historical-based forecast)</h2>
@@ -570,23 +579,6 @@ export default function Home() {
                   <button onClick={downloadCSV} className="bg-green-600 p-2 rounded text-white">Download CSV</button>
                 </div>
               </div>
-            </div>
-
-            {/* Summary box */}
-            <div className="mt-6 bg-gray-700 p-4 rounded">
-              <h3 className="text-lg font-semibold mb-2">Suitability summary</h3>
-              {summary && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {summary.map((s) => (
-                    <div key={s.activity} className={`p-3 rounded ${s.suitable ? "bg-green-900 text-green-200" : "bg-red-900 text-red-200"}`}>
-                      <div className="font-semibold">{s.activity}</div>
-                      <div className="text-sm">
-                        {s.suitable ? "Suitable" : `Not suitable — ${s.reason ?? "conditions unfavourable"}`}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         )}
