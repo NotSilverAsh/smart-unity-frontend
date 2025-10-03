@@ -638,57 +638,7 @@ export default function Home() {
       <div
         className={`${themeClass} min-h-screen p-4 transition-colors duration-300`}
       >
-        <div className="fixed top-4 right-4 z-[1000] flex gap-2">
-          <button
-            className="p-2 bg-gray-700 rounded-md text-white hover:bg-gray-600 transition-colors"
-            onClick={() => setMenuOpen(true)}
-            aria-label="Open menu"
-          >
-            ☰
-          </button>
-          {menuOpen && (
-            <button
-              className="p-2 bg-red-600 rounded-md text-white hover:bg-red-700 transition-colors"
-              onClick={() => setMenuOpen(false)}
-              aria-label="Close menu"
-            >
-              ✕
-            </button>
-          )}
-        </div>
 
-        <div
-          className={`fixed top-0 right-0 h-full bg-gray-800 shadow-lg z-[1000] w-64 p-4 transform transition-transform duration-300 ${
-            menuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          <h3 className="text-lg mb-4 font-semibold text-white">Settings</h3>
-          <div className="mb-4">
-            <label className="text-white mr-2">Temp Unit:</label>
-            <select
-              className="bg-gray-700 p-1 rounded w-full text-white border border-gray-600"
-              value={tempUnit}
-              onChange={(e) => setTempUnit(e.target.value as "C" | "F")}
-            >
-              <option value="C">°C</option>
-              <option value="F">°F</option>
-            </select>
-          </div>
-          <div className="mb-4">
-            <label className="text-white mr-2">Wind Unit:</label>
-            <select
-              className="bg-gray-700 p-1 rounded w-full text-white border border-gray-600"
-              value={windUnit}
-              onChange={(e) =>
-                setWindUnit(e.target.value as "m/s" | "km/h" | "mph")
-              }
-            >
-              <option value="m/s">m/s</option>
-              <option value="km/h">km/h</option>
-              <option value="mph">mph</option>
-            </select>
-          </div>
-        </div>
 
         {showThresholdModal && <ThresholdModal />}
 
