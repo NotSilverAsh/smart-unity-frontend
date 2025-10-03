@@ -706,7 +706,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 mb-8">
           <div className="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg flex flex-col justify-start text-white">
             <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-blue-200">
-              NASA Weather Dashboard
+              Weather Dashboard
             </h2>
 
             <input
