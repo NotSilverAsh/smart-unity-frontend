@@ -89,7 +89,7 @@ export default function Home() {
 
   const [showThresholdModal, setShowThresholdModal] = useState(false);
 
-  const API_BASE_URL = "https://api.sharkybytes.xyz/api/v1/weather";
+  const API_BASE_URL = "https://api.sharkybytes.xyz";
 
   // Threshold input modal component - FIXED Z-INDEX
   const ThresholdModal = () => (
