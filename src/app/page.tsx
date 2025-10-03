@@ -763,8 +763,7 @@ export default function Home() {
               <p>Longitude: {location.lon.toFixed(4)}</p>
               <br />
               <p className="mt-4 rounded bg-yellow-900 text-yellow-300 p-2 font-semibold text-center">
-                Please note: Weather data combines NASA satellite observations
-                with climate models and may not reflect real-time conditions.
+                Data Source: NASA POWER & GMAO models. Probability calculations use historical climate data. Ideal for trend analysis and planning, but verify with local forecasts before continuing.
               </p>
             </div>
 
