@@ -690,15 +690,6 @@ export default function Home() {
 
   return (
     <>
-      <Head>
-        <title>NASA Weather Forecast</title>
-        <meta
-          name="description"
-          content="Weather forecast powered by NASA data"
-        />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
-
       <div
         className={`${themeClass} min-h-screen p-4 transition-colors duration-300`}
       >
@@ -707,7 +698,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 mb-8">
           <div className="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg flex flex-col justify-start text-white">
             <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-blue-200">
-              Weather Dashboard
+              RainAware Weather Dashboard
             </h2>
 
             <input

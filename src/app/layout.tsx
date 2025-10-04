@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Untitled Weather App",
+  title: "RainAware",
   description: "Web-based weather app using Next.js and WeatherAPI.com",
 };
 
